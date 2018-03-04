@@ -1,1 +1,1 @@
-# Topic-Attention-RNN
+# Topic-RNN
