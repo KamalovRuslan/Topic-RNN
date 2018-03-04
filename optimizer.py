@@ -8,7 +8,7 @@ from torch.autograd import Variable
 required = object()
 
 
-class TopicRNNOptimizer(object):
+class Optimizer(object):
     """Base class for all optimizers.
 
     Arguments:
@@ -161,7 +161,6 @@ class TopicRNNOptimizer(object):
             closure (callable): A closure that reevaluates the model and
                 returns the loss. Optional for most optimizers.
         """
-        # Exponential gradient or MulGradient to /Phi parametr
         raise NotImplementedError
 
     def add_param_group(self, param_group):
