@@ -33,5 +33,6 @@ class TRnnOpt(Optimizer):
             pass
 
         # Exponential gradient descent step
+        # Gradient descent for proir Diriclet distribution on vocabulary
 
         return loss

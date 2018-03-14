@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.autograd as autograd
 import torch.nn.functional as F
 from topic_rnn_optimizer import TRnnOpt
+import storage
 
 
 use_cuda = torch.cuda.is_available()
@@ -20,7 +21,7 @@ class TopicRNN(nn.Module):
         else:
             raise ValueError("rnn_type should be GRU or LSTM!")
 
-        self.wt = nn.Linear(ntoken, ntopics)
+        self.vocab_dot_topics = nn.Linear(ntoken, ntopics)
         self.decoder = nn.Linear(nhid, ntopics)
 
         try:
@@ -36,17 +37,18 @@ class TopicRNN(nn.Module):
     def init_weights(self):
         initrange = 0.1
         self.encoder.weight.data.uniform_(-initrange, initrange)
-        self.wt.weight.data.uniform_(0, 1)
-        self.wt = F.normalize(self.wt, p=2, dim=1)
+        self.vocab_dot_topics.weight.data.uniform_(0, 1)
+        self.vocab_dot_topics = F.normalize(self.wt, p=1, dim=1)
         self.decoder.bias.data.fill_(0)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, input, hidden):
+        idx, input = input
         emb = self.drop(self.encoder(input))
         output, hidden = self.rnn(emb, hidden)
         output = self.drop(output)
         decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
-        w_dist = torch.mm(self.wt, decoded)
+        w_dist = torch.dot(self.vocab_dot_topics[idx, :], decoded)
         return w_dist, hidden
 
     def init_hidden(self, bsz):
