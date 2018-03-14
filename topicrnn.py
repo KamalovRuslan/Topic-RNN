@@ -14,6 +14,7 @@ class TopicRNN(nn.Module):
     def __init__(self, rnn_type, ntoken, ninp, nhid, nlayers, ntopics, dropout=0.5):
         super.(TopicRNN, self).__init__()
 
+        # Recurrent part
         self.drop = nn.Dropout()
         self.encoder = nn.Embedding(ntoken, ninp)
         if rnn_type in ['LSTM', 'GRU']:
@@ -21,7 +22,6 @@ class TopicRNN(nn.Module):
         else:
             raise ValueError("rnn_type should be GRU or LSTM!")
 
-        self.vocab_dot_topics = nn.Linear(ntoken, ntopics)
         self.decoder = nn.Linear(nhid, ntopics)
 
         try:
@@ -29,6 +29,10 @@ class TopicRNN(nn.Module):
         except AttributeError:
             pass
 
+        # Token-Topic part
+        self.TokTop = {i: nn.Linear(1, ntopics)}
+
+        # Info Part
         self.rnn_type = rnn_type
         self.nhid = nhid
         self.nlayers = nlayers
@@ -37,8 +41,8 @@ class TopicRNN(nn.Module):
     def init_weights(self):
         initrange = 0.1
         self.encoder.weight.data.uniform_(-initrange, initrange)
-        self.vocab_dot_topics.weight.data.uniform_(0, 1)
-        self.vocab_dot_topics = F.normalize(self.wt, p=1, dim=1)
+        for key in self.TokTop.keys():
+            self.TokTop[key].weight.data.fill_(1 / self.ntokens)
         self.decoder.bias.data.fill_(0)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
@@ -48,8 +52,7 @@ class TopicRNN(nn.Module):
         output, hidden = self.rnn(emb, hidden)
         output = self.drop(output)
         decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
-        w_dist = torch.dot(self.vocab_dot_topics[idx, :], decoded)
-        return w_dist, hidden
+        return decoded, hidden
 
     def init_hidden(self, bsz):
         weight = next(self.parameters()).data

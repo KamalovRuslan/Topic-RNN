@@ -32,7 +32,7 @@ class TRnnOpt(Optimizer):
         for group in self.param_groups:
             pass
 
-        # Exponential gradient descent step
-        # Gradient descent for proir Diriclet distribution on vocabulary
+        # Exponential gradient descent step for each value in TokTop dict
+        # Gradient descent for proir Diriclet distribution in TokTop dict
 
         return loss
