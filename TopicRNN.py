@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.autograd as autograd
 import torch.nn.functional as F
-from topic_rnn_optimizer import TRnnOpt
+from TopicOptimizer import TRnnOpt
 import storage
 
 
