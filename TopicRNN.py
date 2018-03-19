@@ -61,3 +61,7 @@ class TopicRNN(nn.Module):
                     Variable(weight.new(self.nlayers, bsz, self.nhid).zero_()))
         else:
             return Variable(weight.new(self.nlayers, bsz, self.nhid).zero_())
+
+    def normalize_phi(self):
+        # TODO
+        # normalaize phi_dist after step()

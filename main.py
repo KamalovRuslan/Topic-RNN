@@ -27,9 +27,7 @@ def test(epoch):
     return loss
 
 
-def train(epoch, optimizer=TRnnOpt):
-    model = TopicRNN(RNNTYPE, corpus.shape[0])
-    model.train()
+def train(epoch, optimizer):
     for batch in butchify(corpus):
         batch = Variable(batch)
         if args.cuda:
@@ -40,11 +38,17 @@ def train(epoch, optimizer=TRnnOpt):
         loss.backward()
         train_loss += loss.data[0]
         optimizer.step()
+        model.normalize_phi()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
           epoch, train_loss / len(corpus)))
 
 
 for epoch in range(1, epochs):
+    model = TopicRNN(RNNTYPE, corpus.shape[0])
+    model.train()
+    exp_group = {'exp_group': [layer.parameters() for layer in model.TokTop.values()]}
+    com_group = {'com_group': [model.encoder.parameters(), model.decoder.parameters()]}
+    optimizer = TRnnOpt([exp_group, com_group])
     train(epoch)
     # TODO
